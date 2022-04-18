@@ -1,0 +1,41 @@
+import pprint
+import requests
+import json
+from bs4 import BeautifulSoup
+def get_movies_list_details(movie_list):
+    with open("task1_movieData.json","r") as file:
+        data=json.load(file)
+        # print(data)
+    for i in range(0,100):
+        # print(i)
+        url=requests.get(data[i]["url"])
+        # print(url)
+        htmlcontect=url.content
+        # print(htmlcontect)
+        soup=BeautifulSoup(htmlcontect,"html.parser")
+        # print(soup)
+        ul=soup.find("ul",class_="content-meta info")
+        li=ul.find_all('li',class_='meta-row clearfix')
+        # print(li)
+        dict={}
+        h1=soup.find('h1',class_='scoreboard__title').get_text()
+        # print(h1)
+        dict.update({"movie name":h1})
+        for i in li:
+            key=i.find("div",class_="meta-label subtle").get_text().strip().replace(":","")
+            value=i.find("div",class_="meta-value").get_text().strip().replace("\n","").replace(" ","")
+            if key!="Genre" and key!="Original Language" and  key!="Director" and key!="Writer" :
+                # print(key)
+                dict.update({key:value})
+            else:
+                new_value=value.replace(","," ")
+                value_list=new_value.split()
+                dict.update({key:value_list})
+        movie_list.append(dict)
+    pprint.pprint(movie_list)
+    with open("task5.json","w") as file:
+        json.dump(movie_list,file,indent=4)
+get_movies_list_details([])
+
+
+
